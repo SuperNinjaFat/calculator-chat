@@ -5,6 +5,36 @@
     <title>Calculator Chat</title>
 </head>
 <body>
+    <script language="JavaScript" type="text/javascript">
+        var obj, dbParam, xmlhttp, myObj, x, txt = "";
+        obj = { "limit": 10, "sort": "DESC"};
+        dbParam = JSON.stringify(obj);
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                document.getElementById("error").innerHTML = this.responseText;
+                myObj = JSON.parse(this.responseText);
+                if (myObj) {
+                    for (x in myObj) {
+                        txt += '<td>' + myObj[x].timestamp + '</td>' +
+                            '<td>' + myObj[x].num_first + '</td>' +
+                            '<td>' + myObj[x].sign + '</td>' +
+                            '<td>' + myObj[x].num_second + '</td>' +
+                            '<td>=</td>' +
+                            '<td>' + myObj[x].result + '</td>'
+                    }
+                } else {
+                    txt = "<td colspan='4'>No Calculations</td>"
+                }
+                let newCells = document.getElementById("chat").getElementsByTagName('tbody')[0].insertRow().insertCell();
+                newCells.appendChild(document.createTextNode(txt));
+            }
+        };
+        xmlhttp.open("POST", "methods/calculate.php", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.send("params=" + dbParam);
+
+    </script>
     <form name="calculator">
         <input type="number" id="first">
         <select>
@@ -15,6 +45,17 @@
         </select>
         <input type="number" id="second">
     </form>
-    <div id="chat"></div>
+    <div id="chat">
+        <table>
+            <tbody>
+            <tr>
+                <th>Date</th>
+                <th colspan="3">Calculation</th>
+                <th colspan="2">Solution</th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="error" style="padding: 5px"></div>
 </body>
 </html>
