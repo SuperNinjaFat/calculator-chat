@@ -12,22 +12,23 @@
         xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
             if (this.readyState === 4 && this.status === 200) {
-                document.getElementById("error").innerHTML = this.responseText;
                 myObj = JSON.parse(this.responseText);
-                if (myObj) {
+                if (myObj.length) {
                     for (x in myObj) {
-                        txt += '<td>' + myObj[x].timestamp + '</td>' +
-                            '<td>' + myObj[x].num_first + '</td>' +
-                            '<td>' + myObj[x].sign + '</td>' +
-                            '<td>' + myObj[x].num_second + '</td>' +
-                            '<td>=</td>' +
-                            '<td>' + myObj[x].result + '</td>'
+                        let newRow = document.getElementById("chat").getElementsByTagName('tbody')[0].insertRow();
+                        newRow.insertCell().appendChild(document.createTextNode(myObj[x].timestamp));
+                        newRow.insertCell().appendChild(document.createTextNode(myObj[x].num_first));
+                        newRow.insertCell().appendChild(document.createTextNode(myObj[x].sign));
+                        newRow.insertCell().appendChild(document.createTextNode(myObj[x].num_second));
+                        newRow.insertCell().appendChild(document.createTextNode("="));
+                        newRow.insertCell().appendChild(document.createTextNode(myObj[x].result));
                     }
                 } else {
-                    txt = "<td colspan='4'>No Calculations</td>"
+                    cell = document.getElementById("chat").getElementsByTagName('tbody')[0].insertRow().insertCell()
+                    cell.innerHTML = "No Calculations";
+                    cell.style = "text-align: center";
+                    cell.colSpan = 6;
                 }
-                let newCells = document.getElementById("chat").getElementsByTagName('tbody')[0].insertRow().insertCell();
-                newCells.appendChild(document.createTextNode(txt));
             }
         };
         xmlhttp.open("POST", "methods/calculate.php", true);
@@ -35,15 +36,16 @@
         xmlhttp.send("params=" + dbParam);
 
     </script>
-    <form name="calculator">
-        <input type="number" id="first">
-        <select>
+    <form name="calculator" onsubmit="ajaxFunction()">
+        <input type="number" id="first" required>
+        <select required>
             <option value="+">+</option>
             <option value="-">-</option>
             <option value="×">×</option>
             <option value="÷">÷</option>
         </select>
-        <input type="number" id="second">
+        <input type="number" id="second" required>
+        <input type="submit" value="="/>
     </form>
     <div id="chat">
         <table>
