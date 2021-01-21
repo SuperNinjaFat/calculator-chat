@@ -11,7 +11,5 @@ try {
     $result = $stmt->fetchAll();
     echo json_encode($result);
 } catch (PDOException $e) {
-    print "Sorry, Nothing: " . $e->getMessage();// test
+    print "Sorry, Nothing: " . $e->getMessage();
 }
-//maximum result: 2147483647
-//minimum result: -2147483648

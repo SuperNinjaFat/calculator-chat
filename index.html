@@ -5,56 +5,108 @@
     <title>Calculator Chat</title>
 </head>
 <body>
-    <script language="JavaScript" type="text/javascript">
-        var obj, dbParam, xmlhttp, myObj, x, txt = "";
-        obj = { "limit": 10, "sort": "DESC"};
-        dbParam = JSON.stringify(obj);
+    <script type="text/javascript">
+        var xmlhttp, myObj, x;
         xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
+        xmlhttp.onreadystatechange = function () {
             if (this.readyState === 4 && this.status === 200) {
                 myObj = JSON.parse(this.responseText);
+                var new_body = document.createElement('tbody');
+                var old_body = document.getElementById("chat").getElementsByTagName('tbody')[0];
                 if (myObj.length) {
                     for (x in myObj) {
-                        let newRow = document.getElementById("chat").getElementsByTagName('tbody')[0].insertRow();
+                        let newRow = new_body.insertRow();
                         newRow.insertCell().appendChild(document.createTextNode(myObj[x].timestamp));
                         newRow.insertCell().appendChild(document.createTextNode(myObj[x].num_first));
-                        newRow.insertCell().appendChild(document.createTextNode(myObj[x].sign));
+                        newRow.insertCell().appendChild(document.createTextNode(((myObj[x].sign === '.')? "+" : myObj[x].sign)));
                         newRow.insertCell().appendChild(document.createTextNode(myObj[x].num_second));
                         newRow.insertCell().appendChild(document.createTextNode("="));
                         newRow.insertCell().appendChild(document.createTextNode(myObj[x].result));
                     }
                 } else {
-                    cell = document.getElementById("chat").getElementsByTagName('tbody')[0].insertRow().insertCell()
+                    cell = new_body.insertRow().insertCell()
                     cell.innerHTML = "No Calculations";
                     cell.style = "text-align: center";
                     cell.colSpan = 6;
                 }
+                if (new_body.innerHTML !== old_body.innerHTML)
+                    old_body.parentNode.replaceChild(new_body, old_body);
             }
         };
-        xmlhttp.open("POST", "methods/calculate.php", true);
-        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlhttp.send("params=" + dbParam);
+        document.addEventListener("DOMContentLoaded", function(){
+            var num_first = document.getElementById('num_first');
+            var sign = document.getElementById('sign');
+            var num_second = document.getElementById('num_second');
+
+            document.getElementById('submit').addEventListener("click", function() {
+                var result;
+                switch (sign.value) {
+                    case "+":
+                        result = parseFloat(num_first.value) + parseFloat(num_second.value);
+                        break;
+                    case "-":
+                        result = parseFloat(num_first.value) - parseFloat(num_second.value);
+                        break;
+                    case "×":
+                        result = parseFloat(num_first.value) * parseFloat(num_second.value);
+                        break;
+                    case "÷":
+                        result = parseFloat(num_first.value) / parseFloat(num_second.value);
+                }
+                if ((result > 2147483646) || (result < -2147483647)) alert("The result is too large or too small!");
+                else {
+                    var obj, dbParam;
+                    obj = {"num_first": num_first.value, "sign": ((sign.value === '+')? "." : sign.value), "num_second": num_second.value, "result": result};
+                    dbParam = JSON.stringify(obj);
+                    xmlhttp.open("POST", "methods/chat_insert.php", true);
+                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xmlhttp.send("params=" + dbParam);
+                    console.log(((sign.value === '+')? "." : sign.value));
+                    document.getElementById('calculator').reset();
+                    load();
+                }
+            });
+            load();
+        });
+
+        function load() {
+            var obj, dbParam;
+            obj = {"limit": 10, "sort": "DESC"};
+            dbParam = JSON.stringify(obj);
+
+            xmlhttp.open("POST", "methods/chat_select.php", true);
+            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xmlhttp.send("params=" + dbParam);
+        }
+
+        setInterval(function(){
+            load();
+        }, 5000);
+
 
     </script>
-    <form name="calculator" onsubmit="ajaxFunction()">
-        <input type="number" id="first" required>
-        <select required>
-            <option value="+">+</option>
-            <option value="-">-</option>
-            <option value="×">×</option>
-            <option value="÷">÷</option>
+    <form id="calculator">
+        <input type="number" id="num_first" name="num_first" required>
+        <select id="sign" required>
+            <option disabled selected value> </option>
+            <option value='+'>+</option>
+            <option value='-'>-</option>
+            <option value='×'>×</option>
+            <option value='÷'>÷</option>
         </select>
-        <input type="number" id="second" required>
-        <input type="submit" value="="/>
+        <input type="number" id="num_second" name="num_second" required>
+        <input type="button" id="submit" value="="/>
     </form>
     <div id="chat">
         <table>
-            <tbody>
+            <thead>
             <tr>
                 <th>Date</th>
                 <th colspan="3">Calculation</th>
                 <th colspan="2">Solution</th>
             </tr>
+            </thead>
+            <tbody>
             </tbody>
         </table>
     </div>
