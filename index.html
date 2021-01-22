@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="stylesheet" href="lib/css/calc/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
     <title>Calculator Chat</title>
 </head>
 <body>
@@ -12,6 +13,7 @@
             if (this.readyState === 4 && this.status === 200) {
                 myObj = JSON.parse(this.responseText);
                 var new_body = document.createElement('tbody');
+                new_body.className = "animateLoad";
                 var old_body = document.getElementById("chat").getElementsByTagName('tbody')[0];
                 if (myObj.length) {
                     for (x in myObj) {
@@ -61,7 +63,7 @@
                     xmlhttp.open("POST", "methods/chat_insert.php", true);
                     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                     xmlhttp.send("params=" + dbParam);
-                    console.log(((sign.value === '+')? "." : sign.value));
+                    // console.log(((sign.value === '+')? "." : sign.value));
                     document.getElementById('calculator').reset();
                     load();
                 }
@@ -85,19 +87,23 @@
 
 
     </script>
-    <form id="calculator">
-        <input type="number" id="num_first" name="num_first" required>
-        <select id="sign" required>
-            <option disabled selected value> </option>
-            <option value='+'>+</option>
-            <option value='-'>-</option>
-            <option value='×'>×</option>
-            <option value='÷'>÷</option>
-        </select>
-        <input type="number" id="num_second" name="num_second" required>
-        <input type="button" id="submit" value="="/>
-    </form>
-    <div id="chat">
+    <div class="marginAuto center padding animateIntro">
+        <h2 class="title">Calculator Chat</h2>
+    </div>
+    <div class="marginAuto center padding rounded shadow">
+        <form id="calculator">
+            <input type="number" id="num_first" name="num_first" required>
+            <select id="sign" required>
+                <option value='+'>+</option>
+                <option value='-'>-</option>
+                <option value='×'>×</option>
+                <option value='÷'>÷</option>
+            </select>
+            <input type="number" id="num_second" name="num_second" required>
+            <input type="button" id="submit" value="="/>
+        </form>
+    </div>
+    <div id="chat" class="marginAuto center padding rounded shadow">
         <table>
             <thead>
             <tr>
@@ -106,10 +112,13 @@
                 <th colspan="2">Solution</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="tbody" class="animateLoad">
             </tbody>
         </table>
     </div>
     <div id="error" style="padding: 5px"></div>
+    <footer class="center">
+        <h5 class="center home"><a href="http://paulmlindberg.com">paulmlindberg.com</a></h5>
+    </footer>
 </body>
 </html>
